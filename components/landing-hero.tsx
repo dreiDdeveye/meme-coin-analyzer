@@ -29,13 +29,13 @@ export function LandingHero() {
 
       <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10 pt-48">
         <div className="relative">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 top-24">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 top-36">
             <Image
-              src="/images/611252578-1660028608490268-5448069045277775738-n.png"
+              src="/images/oracle-eye-logo.png"
               alt=""
               width={800}
               height={600}
-              className="opacity-[0.08] scale-[3]"
+              className="opacity-[0.05] scale-[3]"
             />
           </div>
 

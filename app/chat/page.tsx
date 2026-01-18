@@ -2,7 +2,7 @@
 
 import { MainNav } from "@/components/main-nav"
 import Aurora from "@/components/aurora"
-import { MessageCircle, Send, Sparkles, Volume2, VolumeX } from "lucide-react"
+import { MessageCircle, Send, Sparkles } from "lucide-react"
 import { useState, useRef, useEffect } from "react"
 import {
   getOracleResponse,
@@ -94,7 +94,7 @@ function SuggestedPrompts({ onSelect }: { onSelect: (prompt: string) => void }) 
   ]
 
   return (
-    <div className="flex flex-wrap gap-2 mt-4">
+    <div className="flex flex-wrap gap-2 justify-center">
       {prompts.map((prompt, idx) => (
         <button
           key={idx}
@@ -111,19 +111,19 @@ function SuggestedPrompts({ onSelect }: { onSelect: (prompt: string) => void }) 
 // Oracle character animation component
 function OracleCharacter({ isThinking }: { isThinking: boolean }) {
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center w-full">
       {/* Outer glow effect */}
-      <div className={`absolute w-40 h-40 rounded-full bg-primary/20 blur-xl ${isThinking ? 'animate-pulse' : ''}`} />
+      <div className={`absolute inset-0 bg-primary/20 blur-xl ${isThinking ? 'animate-pulse' : ''}`} />
       
-      {/* Video container with border */}
-      <div className="relative w-36 h-36 rounded-full overflow-hidden border-2 border-primary/50 shadow-lg shadow-primary/20">
+      {/* Video container */}
+      <div className="relative overflow-hidden w-full">
         <video
           src="/oracleclip.mp4"
           autoPlay
           loop
           muted
           playsInline
-          className={`w-full h-full object-cover ${isThinking ? 'brightness-125' : 'brightness-100'} transition-all duration-300`}
+          className={`block w-full ${isThinking ? 'brightness-125' : 'brightness-100'} transition-all duration-300`}
         />
         
         {/* Thinking overlay */}
@@ -135,9 +135,9 @@ function OracleCharacter({ isThinking }: { isThinking: boolean }) {
       {/* Floating particles when thinking */}
       {isThinking && (
         <>
-          <div className="absolute w-2 h-2 bg-primary rounded-full animate-ping" style={{ top: '5%', left: '15%' }} />
-          <div className="absolute w-1 h-1 bg-primary rounded-full animate-ping" style={{ top: '85%', left: '25%', animationDelay: '0.5s' }} />
-          <div className="absolute w-1.5 h-1.5 bg-primary rounded-full animate-ping" style={{ top: '25%', right: '15%', animationDelay: '0.3s' }} />
+          <div className="absolute w-2 h-2 bg-primary rounded-full animate-ping" style={{ top: '5%', left: '5%' }} />
+          <div className="absolute w-1 h-1 bg-primary rounded-full animate-ping" style={{ bottom: '5%', left: '15%', animationDelay: '0.5s' }} />
+          <div className="absolute w-1.5 h-1.5 bg-primary rounded-full animate-ping" style={{ top: '15%', right: '5%', animationDelay: '0.3s' }} />
         </>
       )}
     </div>
@@ -158,7 +158,6 @@ export default function ChatPage() {
     lastTopic: null,
     mood: "neutral",
   })
-  const [soundEnabled, setSoundEnabled] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -239,7 +238,7 @@ export default function ChatPage() {
 
       <main className="flex-1 mx-auto max-w-4xl w-full px-4 py-8 pt-28 relative z-10 flex flex-col gap-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center">
           <div className="flex items-center gap-3">
             <div className="rounded-full bg-primary/10 p-2 lab-glow">
               <MessageCircle className="h-5 w-5 text-primary" />
@@ -253,43 +252,30 @@ export default function ChatPage() {
               </p>
             </div>
           </div>
-          
-          {/* Sound Toggle */}
-          <button
-            onClick={() => setSoundEnabled(!soundEnabled)}
-            className="p-2 rounded-lg bg-card border border-border hover:bg-card/80 transition-colors"
-            title={soundEnabled ? "Mute sounds" : "Enable sounds"}
-          >
-            {soundEnabled ? (
-              <Volume2 className="h-4 w-4 text-primary" />
-            ) : (
-              <VolumeX className="h-4 w-4 text-muted-foreground" />
-            )}
-          </button>
         </div>
 
-        {/* Oracle Character Display */}
-        <div className="lab-card p-8 flex items-center justify-center min-h-[200px] bg-card/30">
-          <OracleCharacter isThinking={isTyping} />
+        {/* Intro Header */}
+        <div className="text-center">
+          <h3 className="text-3xl font-bold font-mono text-primary mb-3">
+            Start Your Conversation
+          </h3>
+          <p className="text-base text-muted-foreground font-mono max-w-lg mx-auto">
+            Ask The Oracle about token analysis, market trends, trading wisdom, 
+            or anything related to the Solana trenches.
+          </p>
         </div>
 
-        {/* Chat Container */}
-        <div className="lab-card p-6 flex flex-col gap-4 min-h-[400px] max-h-[500px]">
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+        {/* Combined Oracle Card */}
+        <div className="lab-card p-6 flex flex-col gap-4">
+          {/* Oracle Character Display */}
+          <div className="flex items-center justify-center">
+            <OracleCharacter isThinking={isTyping} />
+          </div>
+
+          {/* Chat Messages */}
+          <div className="flex-1 overflow-y-auto space-y-4 pr-2 min-h-[100px] max-h-[300px]">
             {messages.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-center space-y-4 py-8">
-                <div className="rounded-full bg-primary/10 p-4">
-                  <Sparkles className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h3 className="text-lg font-mono text-primary mb-2">
-                    Start Your Conversation
-                  </h3>
-                  <p className="text-sm text-muted-foreground font-mono max-w-md">
-                    Ask The Oracle about token analysis, market trends, trading wisdom, 
-                    or anything related to the Solana trenches.
-                  </p>
-                </div>
+              <div className="flex flex-col items-center justify-center h-full text-center">
                 <SuggestedPrompts onSelect={handleSuggestedPrompt} />
               </div>
             ) : (
