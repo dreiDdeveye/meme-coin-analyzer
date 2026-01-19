@@ -37,7 +37,6 @@ export function MainNav() {
     { href: "/intelligence", label: "INTEL", icon: Radio },
     { href: "/monitor", label: "MONITOR", icon: Radar },
     { href: "/holders", label: "HOLDERS", icon: Users },
-    
   ]
 
   return (
@@ -69,6 +68,16 @@ export function MainNav() {
               </Link>
             )
           })}
+          
+          <a
+            href="https://x.com/i/communities/2013200869089804524?fbclid=IwY2xjawPa6rtleHRuA2FlbQIxMABicmlkETFRbjBJQU5GYllGWnRTM1d1c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHtojgknonjF16DJ-nnErBBcM_6MIIqjYiEzLDDS952rkk571gcddmysYNdlx_aem_Pg26Kar78S7OXq1rBiX83A"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs font-medium px-3 py-2 rounded transition-colors text-muted-foreground hover:text-foreground"
+          >
+            <span className="hidden md:inline">COMMUNITY</span>
+            <Users className="md:hidden h-4 w-4" />
+          </a>
         </div>
 
         <div className="flex items-center gap-1 text-xs text-accent">

@@ -61,7 +61,7 @@ export function LandingFooter() {
                 <span className="text-sm">Follow on X</span>
               </a>
               <a
-                href="https://github.com/dreiDdeveye"
+                href="https://github.com/dreiDdeveye/meme-coin-analyzer?fbclid=IwY2xjawPa6RNleHRuA2FlbQIxMABicmlkETFRbjBJQU5GYllGWnRTM1d1c3J0YwZhcHBfaWQQMjIyMDM5MTc4ODIwMDg5MgABHmiQhHwpSVU-moYYsWEaigxCLrnZLA1htPJn9vEfk4q3ERcRFd7ue21kwMHK_aem_M_h1GJS7_oySncazkw2AGw"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
