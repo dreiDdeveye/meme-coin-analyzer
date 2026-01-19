@@ -3,12 +3,27 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Loader2, AlertCircle } from "lucide-react"
+import Image from "next/image"
 import type { MetaOfTheDayResult } from "@/lib/meta-of-the-day"
 
 interface MetaOfTheDayCardProps {
   data: MetaOfTheDayResult | null
   isLoading: boolean
   error?: string
+}
+
+// Mock data fallback
+const MOCK_DATA: MetaOfTheDayResult = {
+  meta: "Animals with Weapons & Tek Devs",
+  reasoning: "Meta seems to be dominated by animals wielding weapons, cows and some random tek devs that no one understands but are getting bids since finnbags been cookin. Trenchers still waiting for Alon to call a 14k token.",
+  confidence: "high",
+  exampleTokens: [
+    { symbol: "COWGUN", name: "Armed Cow", confidence: 0.92 },
+    { symbol: "TEKDEV", name: "Mystery Dev Token", confidence: 0.85 },
+    { symbol: "FINNBAG", name: "Finnbags Kitchen", confidence: 0.78 },
+  ],
+  totalTokensAnalyzed: 847,
+  timestamp: Date.now(),
 }
 
 export function MetaOfTheDayCard({ data, isLoading, error }: MetaOfTheDayCardProps) {
@@ -44,24 +59,13 @@ export function MetaOfTheDayCard({ data, isLoading, error }: MetaOfTheDayCardPro
     )
   }
 
-  if (!data || !data.confidence) {
-    return (
-      <Card className="border-border/50 bg-card/50">
-        <CardHeader>
-          <CardTitle>Meta of the Day</CardTitle>
-          <CardDescription>Daily narrative intelligence</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">No dominant meta detected today. Market conditions are mixed.</p>
-        </CardContent>
-      </Card>
-    )
-  }
+  // Use mock data if no data provided
+  const displayData = data && data.confidence ? data : MOCK_DATA
 
   const confidenceColor =
-    data.confidence === "high"
+    displayData.confidence === "high"
       ? "bg-success/20 text-success"
-      : data.confidence === "medium"
+      : displayData.confidence === "medium"
         ? "bg-accent/20 text-accent"
         : "bg-destructive/20 text-destructive"
 
@@ -73,20 +77,30 @@ export function MetaOfTheDayCard({ data, isLoading, error }: MetaOfTheDayCardPro
             <CardTitle>Meta of the Day</CardTitle>
             <CardDescription>Daily narrative intelligence</CardDescription>
           </div>
-          <Badge className={confidenceColor}>{(data.confidence || "low").toUpperCase()}</Badge>
+          <Badge className={confidenceColor}>{(displayData.confidence || "low").toUpperCase()}</Badge>
         </div>
       </CardHeader>
 
       <CardContent className="space-y-4">
+        {/* Meta Image */}
+        <div className="relative w-full h-44 rounded-lg overflow-hidden bg-muted/50">
+          <Image
+            src="/images/metaoftheday.jpeg"
+            alt="Meta of the day"
+            fill
+            className="object-cover"
+          />
+        </div>
+
         <div className="rounded-lg border border-border/50 bg-background/50 p-4">
-          <div className="text-lg font-bold text-primary mb-2">{data.meta || "Unknown Meta"}</div>
-          <p className="text-sm text-foreground/80">{data.reasoning || "No reasoning available"}</p>
+          <div className="text-lg font-bold text-primary mb-2">{displayData.meta || "Unknown Meta"}</div>
+          <p className="text-sm text-foreground/80">{displayData.reasoning || "No reasoning available"}</p>
         </div>
 
         <div>
           <h4 className="text-xs font-semibold text-muted-foreground mb-2">Example Tokens</h4>
           <div className="space-y-2">
-            {(data.exampleTokens || []).map((token) => (
+            {(displayData.exampleTokens || []).map((token) => (
               <div
                 key={`${token.symbol}-example`}
                 className="flex items-center justify-between rounded-lg border border-border/30 bg-background/50 px-3 py-2"
@@ -102,7 +116,7 @@ export function MetaOfTheDayCard({ data, isLoading, error }: MetaOfTheDayCardPro
         </div>
 
         <div className="text-xs text-muted-foreground border-t border-border/30 pt-3">
-          Based on analysis of {data.totalTokensAnalyzed || 0} recent launches
+          Based on analysis of {displayData.totalTokensAnalyzed || 0} recent launches
         </div>
       </CardContent>
     </Card>

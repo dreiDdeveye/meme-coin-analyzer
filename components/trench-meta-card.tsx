@@ -1,22 +1,19 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { getTrenchMeta, type TrenchMetaData } from "@/lib/trench-meta-storage"
 import { Sparkles } from "lucide-react"
 import Image from "next/image"
 
-export function TrenchMetaCard() {
-  const [customMeta, setCustomMeta] = useState<TrenchMetaData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+// Mock trench meta data
+const MOCK_TRENCH_META = {
+  title: "Degen Season: Animal Memes Dominate",
+  description: "Dog and cat themed tokens are leading the trenches with massive community engagement and viral social metrics. Watch for high-conviction plays with strong holder distribution.",
+  emoji: "🐕",
+  imageUrl: null
+}
 
-  useEffect(() => {
-    async function loadMeta() {
-      const meta = await getTrenchMeta()
-      setCustomMeta(meta)
-      setIsLoading(false)
-    }
-    loadMeta()
-  }, [])
+export function TrenchMetaCard() {
+  const customMeta = MOCK_TRENCH_META
+  const isLoading = false
 
   if (isLoading) {
     return (

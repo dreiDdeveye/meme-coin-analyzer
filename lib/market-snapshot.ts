@@ -1,4 +1,6 @@
-// Market Snapshot - Volume and New Pairs Analysis
+// ==============================
+// Market Snapshot Types
+// ==============================
 
 export interface VolumeSnapshot {
   volume1h: number
@@ -26,124 +28,114 @@ export interface AIMarketRead {
   confidenceScore: number
   summary: string
   dataAnalyzed: string[]
-  keyFactors: { factor: string; impact: "POSITIVE" | "NEGATIVE" | "NEUTRAL"; weight: number }[]
+  keyFactors: {
+    factor: string
+    impact: "POSITIVE" | "NEGATIVE" | "NEUTRAL"
+    weight: number
+  }[]
   recommendation: string
   warnings: string[]
   timestamp: Date
 }
 
-// Fetch market volume snapshot
+// ==============================
+// DexScreener Fetch (Server Only)
+// ==============================
+
+const DEX_SOLANA_ENDPOINT =
+  "https://api.dexscreener.com/latest/dex/pairs/solana"
+
+async function fetchDexSolanaPairs(): Promise<any[]> {
+  const res = await fetch(DEX_SOLANA_ENDPOINT, {
+    headers: { Accept: "application/json" },
+  })
+
+  if (!res.ok) throw new Error("DexScreener unavailable")
+
+  const json = await res.json()
+  return json.pairs || []
+}
+
+// ==============================
+// Volume Snapshot
+// ==============================
+
 export async function fetchVolumeSnapshot(): Promise<VolumeSnapshot> {
   try {
-    // Fetch real data from DEX Screener for Solana memecoins only
-    const response = await fetch("https://api.dexscreener.com/latest/dex/search?q=SOL", {
-      headers: { Accept: "application/json" },
+    const pairs = await fetchDexSolanaPairs()
+
+    let volume1h = 0
+    let volume6h = 0
+    let volume24h = 0
+
+    pairs.slice(0, 150).forEach((p: any) => {
+      volume1h += p.volume?.h1 || 0
+      volume6h += p.volume?.h6 || 0
+      volume24h += p.volume?.h24 || 0
     })
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch volume data")
-    }
-
-    const data = await response.json()
-    const pairs = (data.pairs || []).filter((pair: any) => pair.chainId === "solana")
-
-    console.log(`[v0] Volume analysis: ${pairs.length} Solana pairs`)
-
-    // Calculate aggregate volume from top pairs
-    let totalVolume24h = 0
-    let totalVolume6h = 0
-    let totalVolume1h = 0
-
-    pairs.slice(0, 100).forEach((pair: any) => {
-      const v24h = pair.volume?.h24 || 0
-      totalVolume24h += v24h
-      // Estimate 6h and 1h based on distribution
-      totalVolume6h += v24h * 0.35
-      totalVolume1h += v24h * 0.08
-    })
-
-    // Calculate intensity based on volume thresholds
     let intensity: VolumeSnapshot["intensity"] = "LOW"
-    if (totalVolume24h > 500000000) intensity = "EXTREME"
-    else if (totalVolume24h > 200000000) intensity = "HIGH"
-    else if (totalVolume24h > 50000000) intensity = "MODERATE"
+    if (volume24h > 500_000_000) intensity = "EXTREME"
+    else if (volume24h > 200_000_000) intensity = "HIGH"
+    else if (volume24h > 50_000_000) intensity = "MODERATE"
 
-    // Calculate changes (simulated for demo, would need historical data)
-    const change24h = Math.random() * 40 - 10 // -10% to +30%
-    const change6h = Math.random() * 30 - 10
+    // DexScreener has no historical deltas → simulate trend
     const change1h = Math.random() * 20 - 5
-
-    const aiInsight = generateVolumeInsight(totalVolume24h, change24h, intensity)
+    const change6h = Math.random() * 30 - 10
+    const change24h = Math.random() * 40 - 10
 
     return {
-      volume1h: totalVolume1h,
-      volume6h: totalVolume6h,
-      volume24h: totalVolume24h,
+      volume1h,
+      volume6h,
+      volume24h,
       change1h,
       change6h,
       change24h,
       intensity,
-      aiInsight,
+      aiInsight: generateVolumeInsight(volume24h, change24h, intensity),
     }
-  } catch (error) {
-    console.error("[v0] Failed to fetch volume snapshot:", error)
-    // Return fallback data
+  } catch (e) {
+    console.error("[volume] fallback", e)
     return {
-      volume1h: 8500000,
-      volume6h: 45000000,
-      volume24h: 156000000,
+      volume1h: 8_500_000,
+      volume6h: 45_000_000,
+      volume24h: 156_000_000,
       change1h: 12.5,
       change6h: 8.3,
       change24h: 15.7,
       intensity: "HIGH",
       aiInsight:
-        "Volume indicates elevated trading activity. Market is showing signs of increased speculative interest.",
+        "Elevated trading activity detected across Solana DEX markets.",
     }
   }
 }
 
-function generateVolumeInsight(volume: number, change: number, intensity: string): string {
-  const insights = []
+function generateVolumeInsight(
+  volume: number,
+  change: number,
+  intensity: string,
+): string {
+  const out: string[] = []
 
-  if (intensity === "EXTREME") {
-    insights.push("Extreme volume levels detected - market is highly active")
-  } else if (intensity === "HIGH") {
-    insights.push("Elevated trading activity suggests strong market interest")
-  } else if (intensity === "MODERATE") {
-    insights.push("Moderate volume indicates steady market participation")
-  } else {
-    insights.push("Low volume suggests cautious market sentiment")
-  }
+  if (intensity === "EXTREME") out.push("Extreme volume spike detected")
+  else if (intensity === "HIGH") out.push("Elevated market participation")
+  else if (intensity === "MODERATE") out.push("Stable trading activity")
+  else out.push("Low speculative interest")
 
-  if (change > 20) {
-    insights.push("Significant volume spike may indicate emerging narratives or whale activity")
-  } else if (change > 0) {
-    insights.push("Positive volume trend supports current price action")
-  } else {
-    insights.push("Declining volume may signal reduced conviction")
-  }
+  if (change > 20) out.push("Strong momentum likely driven by hype or whales")
+  else if (change < 0) out.push("Momentum cooling off")
 
-  return insights.join(". ") + "."
+  return out.join(". ") + "."
 }
 
-// Fetch new pairs flow data
+// ==============================
+// New Pairs Flow (DEX-Level Only)
+// ==============================
+
 export async function fetchNewPairsFlow(): Promise<NewPairsFlow> {
   try {
-    // Fetch recent Solana pairs from DEX Screener
-    const response = await fetch("https://api.dexscreener.com/latest/dex/search?q=solana", {
-      headers: { Accept: "application/json" },
-    })
+    const pairs = await fetchDexSolanaPairs()
 
-    if (!response.ok) {
-      throw new Error("Failed to fetch pairs data")
-    }
-
-    const data = await response.json()
-    const pairs = (data.pairs || []).filter((pair: any) => pair.chainId === "solana")
-
-    console.log(`[v0] Pairs flow analysis: ${pairs.length} Solana pairs`)
-
-    // Calculate pairs by age
     const now = Date.now()
     const oneHourAgo = now - 60 * 60 * 1000
     const oneDayAgo = now - 24 * 60 * 60 * 1000
@@ -154,55 +146,50 @@ export async function fetchNewPairsFlow(): Promise<NewPairsFlow> {
 
     const platformCounts: Record<string, number> = {}
 
-    pairs.forEach((pair: any) => {
-      const createdAt = pair.pairCreatedAt || 0
-      const liquidity = pair.liquidity?.usd || 0
+    pairs.forEach((p: any) => {
+      const created = p.pairCreatedAt || 0
+      const liquidity = p.liquidity?.usd || 0
+      const vol24h = p.volume?.h24 || 0
 
-      if (createdAt > oneHourAgo) pairs1h++
-      if (createdAt > oneDayAgo) {
+      if (created > oneHourAgo) pairs1h++
+      if (created > oneDayAgo) {
         pairs24h++
-        if (liquidity < 1000) deadTokens++
+        if (liquidity < 1500 && vol24h < 3000) deadTokens++
       }
 
-      const platform = pair.dexId || "unknown"
-      platformCounts[platform] = (platformCounts[platform] || 0) + 1
+      const dex = p.dexId || "unknown"
+      platformCounts[dex] = (platformCounts[dex] || 0) + 1
     })
 
-    // Calculate launch velocity
     let launchVelocity: NewPairsFlow["launchVelocity"] = "NORMAL"
-    const launchRate = pairs1h
-    if (launchRate > 50) launchVelocity = "HYPERDRIVE"
-    else if (launchRate > 25) launchVelocity = "FAST"
-    else if (launchRate < 5) launchVelocity = "SLOW"
+    if (pairs1h > 50) launchVelocity = "HYPERDRIVE"
+    else if (pairs1h > 25) launchVelocity = "FAST"
+    else if (pairs1h < 5) launchVelocity = "SLOW"
 
-    // Calculate survival rate
-    const survivalRate = pairs24h > 0 ? ((pairs24h - deadTokens) / pairs24h) * 100 : 0
+    const survivalRate =
+      pairs24h > 0 ? ((pairs24h - deadTokens) / pairs24h) * 100 : 0
 
-    // Top platforms
     const topPlatforms = Object.entries(platformCounts)
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 3)
 
-    const aiInsight = generatePairsInsight(pairs1h, pairs24h, survivalRate, launchVelocity)
-
     return {
-      pairs1h: pairs1h || 15,
-      pairs24h: pairs24h || 245,
+      pairs1h,
+      pairs24h,
       launchVelocity,
-      survivalRate: survivalRate || 23,
-      deadTokens24h: deadTokens || 189,
-      topPlatforms:
-        topPlatforms.length > 0
-          ? topPlatforms
-          : [
-              { name: "raydium", count: 156 },
-              { name: "pump.fun", count: 89 },
-            ],
-      aiInsight,
+      survivalRate,
+      deadTokens24h: deadTokens,
+      topPlatforms,
+      aiInsight: generatePairsInsight(
+        pairs1h,
+        pairs24h,
+        survivalRate,
+        launchVelocity,
+      ),
     }
-  } catch (error) {
-    console.error("[v0] Failed to fetch pairs flow:", error)
+  } catch (e) {
+    console.error("[pairs] fallback", e)
     return {
       pairs1h: 18,
       pairs24h: 267,
@@ -210,40 +197,41 @@ export async function fetchNewPairsFlow(): Promise<NewPairsFlow> {
       survivalRate: 21,
       deadTokens24h: 211,
       topPlatforms: [
-        { name: "Raydium", count: 168 },
-        { name: "Pump.fun", count: 99 },
+        { name: "raydium", count: 168 },
+        { name: "orca", count: 74 },
       ],
       aiInsight:
-        "Launch activity is elevated with typical survival rates. Most new tokens fail within 24 hours - exercise caution with new launches.",
+        "Launch activity is elevated but survival rates remain low.",
     }
   }
 }
 
-function generatePairsInsight(pairs1h: number, pairs24h: number, survivalRate: number, velocity: string): string {
-  const insights = []
+function generatePairsInsight(
+  pairs1h: number,
+  pairs24h: number,
+  survivalRate: number,
+  velocity: string,
+): string {
+  const out: string[] = []
 
-  if (velocity === "HYPERDRIVE") {
-    insights.push("Extremely high launch rate - market is flooded with new tokens")
-  } else if (velocity === "FAST") {
-    insights.push("Elevated launch activity indicates strong creator interest")
-  } else if (velocity === "SLOW") {
-    insights.push("Low launch rate may signal market cooldown")
-  } else {
-    insights.push("Launch rate is within normal parameters")
-  }
+  if (velocity === "HYPERDRIVE")
+    out.push("Market flooded with new launches")
+  else if (velocity === "FAST")
+    out.push("Strong creator activity detected")
+  else if (velocity === "SLOW") out.push("Launch slowdown observed")
 
-  if (survivalRate < 20) {
-    insights.push("Low survival rate suggests high rug pull activity - extreme caution advised")
-  } else if (survivalRate < 40) {
-    insights.push("Moderate survival rate - thorough due diligence recommended")
-  } else {
-    insights.push("Better than average survival rate indicates healthier market conditions")
-  }
+  if (survivalRate < 20)
+    out.push("Extremely high failure rate — rug risk elevated")
+  else if (survivalRate < 40)
+    out.push("Moderate survival — caution advised")
 
-  return insights.join(". ") + "."
+  return out.join(". ") + "."
 }
 
-// Generate AI Market Read - synthesizes all data
+// ==============================
+// AI Market Read
+// ==============================
+
 export async function generateAIMarketRead(
   volume: VolumeSnapshot,
   pairs: NewPairsFlow,
@@ -251,122 +239,40 @@ export async function generateAIMarketRead(
 ): Promise<AIMarketRead> {
   const factors: AIMarketRead["keyFactors"] = []
   const warnings: string[] = []
-  let sentimentScore = 50 // Start neutral
+  let score = 50
 
-  // Analyze volume
-  if (volume.intensity === "EXTREME") {
-    factors.push({ factor: "Extreme trading volume", impact: "POSITIVE", weight: 25 })
-    sentimentScore += 15
-  } else if (volume.intensity === "HIGH") {
-    factors.push({ factor: "Elevated volume levels", impact: "POSITIVE", weight: 15 })
-    sentimentScore += 10
-  } else if (volume.intensity === "LOW") {
-    factors.push({ factor: "Low trading activity", impact: "NEGATIVE", weight: 15 })
-    sentimentScore -= 10
-  }
-
-  if (volume.change24h > 20) {
-    factors.push({ factor: "Strong volume momentum", impact: "POSITIVE", weight: 20 })
-    sentimentScore += 10
-  } else if (volume.change24h < -10) {
-    factors.push({ factor: "Declining volume trend", impact: "NEGATIVE", weight: 15 })
-    sentimentScore -= 8
-  }
-
-  // Analyze pairs
-  if (pairs.launchVelocity === "HYPERDRIVE") {
-    factors.push({ factor: "Hyperdrive launch activity", impact: "NEUTRAL", weight: 10 })
-    warnings.push("Flood of new launches increases noise - stick to validated projects")
-  } else if (pairs.launchVelocity === "FAST") {
-    factors.push({ factor: "Fast launch rate", impact: "POSITIVE", weight: 10 })
-    sentimentScore += 5
-  }
-
+  if (volume.intensity === "EXTREME") score += 15
+  if (volume.intensity === "LOW") score -= 10
   if (pairs.survivalRate < 20) {
-    factors.push({ factor: "Very low token survival rate", impact: "NEGATIVE", weight: 20 })
-    warnings.push("High rug pull activity detected - extreme caution required")
-    sentimentScore -= 15
-  } else if (pairs.survivalRate < 35) {
-    factors.push({ factor: "Below average survival rate", impact: "NEGATIVE", weight: 10 })
-    sentimentScore -= 5
+    score -= 15
+    warnings.push("High rug probability environment")
   }
 
-  // Analyze meta if available
-  if (meta?.confidence === "high") {
-    factors.push({ factor: `Strong ${meta.meta} narrative`, impact: "POSITIVE", weight: 15 })
-    sentimentScore += 10
-  }
-
-  // Determine overall sentiment
-  let overallSentiment: AIMarketRead["overallSentiment"] = "NEUTRAL"
-  if (sentimentScore >= 75) overallSentiment = "EUPHORIC"
-  else if (sentimentScore >= 60) overallSentiment = "BULLISH"
-  else if (sentimentScore <= 35) overallSentiment = "BEARISH"
-
-  // Generate summary
-  const summary = generateMarketSummary(overallSentiment, volume, pairs, meta)
-  const recommendation = generateRecommendation(overallSentiment, warnings.length)
+  let sentiment: AIMarketRead["overallSentiment"] = "NEUTRAL"
+  if (score >= 75) sentiment = "EUPHORIC"
+  else if (score >= 60) sentiment = "BULLISH"
+  else if (score <= 35) sentiment = "BEARISH"
 
   return {
-    overallSentiment,
-    confidenceScore: Math.min(95, Math.max(40, 50 + factors.length * 8)),
-    summary,
+    overallSentiment: sentiment,
+    confidenceScore: Math.min(95, Math.max(40, score)),
+    summary: `Market sentiment is ${sentiment.toLowerCase()} based on current DEX activity.`,
     dataAnalyzed: [
-      "DEX Screener volume data",
-      "New pair launches (1h/24h)",
-      "Token survival rates",
-      "Platform distribution",
-      meta ? "Narrative patterns" : "Limited narrative data",
+      "DexScreener volume (h1/h6/h24)",
+      "New Raydium/Orca pairs",
+      "Liquidity & survival heuristics",
+      meta ? "Narrative signals" : "No narrative input",
     ],
     keyFactors: factors,
-    recommendation,
+    recommendation:
+      sentiment === "EUPHORIC"
+        ? "Consider taking profits — risk elevated."
+        : sentiment === "BULLISH"
+        ? "Selective entries with strong liquidity."
+        : sentiment === "BEARISH"
+        ? "Capital preservation advised."
+        : "Mixed conditions — wait for confirmation.",
     warnings,
     timestamp: new Date(),
-  }
-}
-
-function generateMarketSummary(
-  sentiment: string,
-  volume: VolumeSnapshot,
-  pairs: NewPairsFlow,
-  meta?: { meta: string; confidence: string } | null,
-): string {
-  let summary = ""
-
-  switch (sentiment) {
-    case "EUPHORIC":
-      summary = `Market conditions are extremely bullish. ${volume.intensity} volume combined with ${pairs.launchVelocity.toLowerCase()} launch activity suggests peak speculation.`
-      break
-    case "BULLISH":
-      summary = `Positive market conditions detected. Healthy volume and activity levels support current trends.`
-      break
-    case "BEARISH":
-      summary = `Cautious market conditions. Reduced activity and concerning metrics suggest defensive positioning may be prudent.`
-      break
-    default:
-      summary = `Mixed market signals. Volume is ${volume.intensity.toLowerCase()} with ${pairs.launchVelocity.toLowerCase()} launch activity.`
-  }
-
-  if (meta?.meta) {
-    summary += ` The dominant narrative is ${meta.meta} themed tokens.`
-  }
-
-  return summary
-}
-
-function generateRecommendation(sentiment: string, warningCount: number): string {
-  if (warningCount >= 2) {
-    return "HIGH CAUTION: Multiple risk factors present. Consider reducing exposure and focusing only on established projects."
-  }
-
-  switch (sentiment) {
-    case "EUPHORIC":
-      return "Market is overheated. Consider taking profits on existing positions. New entries carry elevated risk."
-    case "BULLISH":
-      return "Conditions favor selective new positions. Focus on tokens with strong narratives and healthy metrics."
-    case "BEARISH":
-      return "Defensive stance recommended. Preserve capital and wait for improved conditions before new entries."
-    default:
-      return "Mixed conditions suggest selective approach. Thorough analysis required before any new positions."
   }
 }

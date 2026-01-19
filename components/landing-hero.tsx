@@ -29,7 +29,7 @@ export function LandingHero() {
 
       <div className="max-w-4xl mx-auto text-center space-y-8 relative z-10 pt-48">
         <div className="relative">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 top-36">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none -z-10 top-55">
             <Image
               src="/images/oracle-eye-logo.png"
               alt=""
@@ -62,10 +62,10 @@ export function LandingHero() {
             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </Link>
           <Link
-            href="/dashboard"
+            href="/chat"
             className="inline-flex items-center justify-center gap-2 border-2 border-primary/50 bg-transparent text-foreground px-8 py-4 rounded text-sm font-mono tracking-wider hover:border-primary hover:bg-primary/10 hover:scale-105 transition-all"
           >
-            ENTER LAB
+            TALK TO THE ORACLE
           </Link>
         </div>
 

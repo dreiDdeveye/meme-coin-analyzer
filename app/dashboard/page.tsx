@@ -8,24 +8,163 @@ import { VolumeSnapshotCard } from "@/components/volume-snapshot-card"
 import { NewPairsCard } from "@/components/new-pairs-card"
 import { MetaOfTheDayCard } from "@/components/meta-of-the-day-card"
 import { FindGemsCard } from "@/components/find-gems-card"
-import { useMemecoinData } from "@/hooks/use-memecoin-data"
-import { useMetaOfTheDay } from "@/hooks/use-meta-of-the-day"
-import { useFindGems } from "@/hooks/use-find-gems"
-import { useMarketSnapshot } from "@/hooks/use-market-snapshot"
-import { Activity, Loader2, BarChart3 } from "lucide-react"
+import { Activity, BarChart3, AlertCircle, Loader2 } from "lucide-react"
 import { TrendingTokensTable } from "@/components/trending-tokens-table"
 
-export default function Dashboard() {
-  const { data: tokens, isLoading: tokensLoading } = useMemecoinData()
-  const { data: metaData, isLoading: metaLoading, error: metaError } = useMetaOfTheDay()
-  const { data: gemsData, isLoading: gemsLoading, error: gemsError } = useFindGems()
-  const { data: snapshotData, isLoading: snapshotLoading } = useMarketSnapshot()
+// Mock data for the Lab page
+const MOCK_TOKENS = [
+  {
+    pair: {
+      chainId: "solana",
+      dexId: "raydium",
+      url: "#",
+      pairAddress: "mock1",
+      baseToken: { address: "mock1", name: "Mock Dog Token", symbol: "MDOG" },
+      quoteToken: { address: "So11111111111111111111111111111111111111112", name: "Wrapped SOL", symbol: "SOL" },
+      priceNative: "0.0001234",
+      priceUsd: "0.0234",
+      txns: { m5: { buys: 45, sells: 32 }, h1: { buys: 320, sells: 245 }, h24: { buys: 1250, sells: 980 } },
+      volume: { m5: 5200, h1: 32000, h24: 125000 },
+      priceChange: { m5: 3.5, h1: 12.3, h24: 45.6 },
+      liquidity: { usd: 85000, base: 3500000, quote: 820 },
+      fdv: 450000,
+      marketCap: 450000,
+      pairCreatedAt: Date.now() - 86400000 * 2,
+      info: { imageUrl: "/placeholder.svg" }
+    },
+    riskScore: { score: 65, level: "MEDIUM" as const, factors: {} },
+    priceUsd: 0.0234,
+    marketCap: 450000,
+    liquidity: 85000,
+    volume24h: 125000
+  },
+  {
+    pair: {
+      chainId: "solana",
+      dexId: "raydium",
+      url: "#",
+      pairAddress: "mock2",
+      baseToken: { address: "mock2", name: "Mock Cat Coin", symbol: "MCAT" },
+      quoteToken: { address: "So11111111111111111111111111111111111111112", name: "Wrapped SOL", symbol: "SOL" },
+      priceNative: "0.0005678",
+      priceUsd: "0.0897",
+      txns: { m5: { buys: 28, sells: 41 }, h1: { buys: 210, sells: 298 }, h24: { buys: 890, sells: 1120 } },
+      volume: { m5: 4100, h1: 24500, h24: 98000 },
+      priceChange: { m5: -2.1, h1: -8.4, h24: -22.8 },
+      liquidity: { usd: 62000, base: 2100000, quote: 595 },
+      fdv: 320000,
+      marketCap: 320000,
+      pairCreatedAt: Date.now() - 86400000 * 5,
+      info: { imageUrl: "/placeholder.svg" }
+    },
+    riskScore: { score: 72, level: "MEDIUM" as const, factors: {} },
+    priceUsd: 0.0897,
+    marketCap: 320000,
+    liquidity: 62000,
+    volume24h: 98000
+  }
+]
 
-  const totalVolume = tokens.reduce((acc, token) => acc + (token.volume24h || 0), 0)
-  const totalTxns = tokens.reduce(
-    (acc, token) => acc + ((token.pair.txns?.h24?.buys || 0) + (token.pair.txns?.h24?.sells || 0)),
-    0,
-  )
+const MOCK_META_DATA = {
+  meta: "Animal / Classic Meme",
+  confidence: "high" as const,
+  reasoning: "Strong presence of dog and cat-themed tokens dominating recent launches with high community engagement",
+  exampleTokens: [
+    { symbol: "MDOG", name: "Mock Dog Token", confidence: 0.92 },
+    { symbol: "MCAT", name: "Mock Cat Coin", confidence: 0.88 }
+  ],
+  totalTokensAnalyzed: 45,
+  timestamp: Date.now()
+}
+
+const MOCK_GEMS_DATA = [
+  {
+    token: { symbol: "MGEM1", name: "Mock Gem 1", address: "mockgem1" },
+    score: 85,
+    status: "WATCH" as const,
+    factors: {
+      pumpTraction: 78,
+      dexMomentum: 82,
+      bundleRisk: 15,
+      narrativeStrength: 88,
+      volumeTrend: 90
+    },
+    reasoning: "High community engagement with strong volume growth and low bundle risk",
+    source: "dex" as const,
+    riskLevel: "low" as const
+  },
+  {
+    token: { symbol: "MGEM2", name: "Mock Gem 2", address: "mockgem2" },
+    score: 78,
+    status: "EARLY" as const,
+    factors: {
+      pumpTraction: 72,
+      dexMomentum: 75,
+      bundleRisk: 22,
+      narrativeStrength: 80,
+      volumeTrend: 85
+    },
+    reasoning: "Strong liquidity growth with emerging narrative strength",
+    source: "dex" as const,
+    riskLevel: "medium" as const
+  }
+]
+
+const MOCK_SNAPSHOT_DATA = {
+  aiMarketRead: {
+    overallSentiment: "BULLISH" as const,
+    confidenceScore: 0.78,
+    summary: "Mock market conditions show favorable trends for memecoin trading with increased volume and positive sentiment",
+    dataAnalyzed: ["Volume trends", "New pair launches", "Social metrics", "DEX activity"],
+    keyFactors: [
+      { factor: "24h Volume Growth", impact: "POSITIVE" as const, weight: 0.85 },
+      { factor: "New Pair Velocity", impact: "POSITIVE" as const, weight: 0.72 },
+      { factor: "Market Saturation", impact: "NEGATIVE" as const, weight: 0.45 }
+    ],
+    recommendation: "Monitor high-volume tokens with strong community engagement and low bundle risk",
+    warnings: ["High volatility expected", "Demo data - not for actual trading decisions"],
+    timestamp: new Date()
+  },
+  volumeSnapshot: {
+    volume1h: 420000,
+    volume6h: 1835000,
+    volume24h: 5240000,
+    change1h: 12.5,
+    change6h: 8.3,
+    change24h: 23.7,
+    intensity: "MODERATE" as const,
+    aiInsight: "Trading volume shows steady growth with moderate market intensity"
+  },
+  newPairsFlow: {
+    pairs1h: 8,
+    pairs24h: 127,
+    launchVelocity: "NORMAL" as const,
+    survivalRate: 68,
+    deadTokens24h: 41,
+    topPlatforms: [
+      { name: "Raydium", count: 82 },
+      { name: "Orca", count: 34 },
+      { name: "Jupiter", count: 11 }
+    ],
+    aiInsight: "Steady launch rate with 68% survival - healthy market conditions"
+  }
+}
+
+export default function Dashboard() {
+  // Using mock data instead of API calls
+  const tokens = MOCK_TOKENS
+  const tokensLoading = false
+  const metaData = MOCK_META_DATA
+  const metaLoading = false
+  const metaError = undefined
+  const gemsData = MOCK_GEMS_DATA
+  const gemsLoading = false
+  const gemsError = undefined
+  const snapshotData = MOCK_SNAPSHOT_DATA
+  const snapshotLoading = false
+
+  const totalVolume = 0
+  const totalTxns = 0
 
   return (
     <div className="min-h-screen bg-background">
