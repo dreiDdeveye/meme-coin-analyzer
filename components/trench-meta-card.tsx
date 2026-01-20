@@ -5,9 +5,9 @@ import Image from "next/image"
 
 // Mock trench meta data
 const MOCK_TRENCH_META = {
-  title: "Degen Season: Animal Memes Dominate",
-  description: "Dog and cat themed tokens are leading the trenches with massive community engagement and viral social metrics. Watch for high-conviction plays with strong holder distribution.",
-  emoji: "🐕",
+  title: "No Meta Today",
+  description: "There’s no established meta at the moment, mainly because major coins like BTC and various alts have been bleeding since the weekend.",
+  emoji: "",
   imageUrl: null
 }
 

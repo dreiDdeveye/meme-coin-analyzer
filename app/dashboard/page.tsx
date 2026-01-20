@@ -70,8 +70,8 @@ const MOCK_META_DATA = {
   confidence: "high" as const,
   reasoning: "Strong presence of dog and cat-themed tokens dominating recent launches with high community engagement",
   exampleTokens: [
-    { symbol: "MDOG", name: "Mock Dog Token", confidence: 0.92 },
-    { symbol: "MCAT", name: "Mock Cat Coin", confidence: 0.88 }
+    { symbol: "$RYANAIR", name: "RyanAir", confidence: 0.92 },
+
   ],
   totalTokensAnalyzed: 45,
   timestamp: Date.now()
