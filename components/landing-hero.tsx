@@ -73,10 +73,10 @@ export function LandingHero() {
         <div className="flex items-center justify-center pt-4">
           <div className="flex items-center gap-3 px-4 py-2 bg-card/50 border border-border rounded-lg">
             <span className="text-xs font-mono text-muted-foreground">CA:</span>
-            <span className="text-sm font-mono text-primary tracking-wider">FuxNXL2gSqy3Jr6BTuDMXXEWo6rNxKeMs67TMuW5pump</span>
+            <span className="text-sm font-mono text-primary tracking-wider">9bnYDvGLxuNzHq7ZNAvPryn51TjSJRLhdJw694RDpump</span>
             <button 
               className="text-muted-foreground hover:text-primary transition-colors"
-              onClick={() => navigator.clipboard.writeText("FuxNXL2gSqy3Jr6BTuDMXXEWo6rNxKeMs67TMuW5pump")}
+              onClick={() => navigator.clipboard.writeText("9bnYDvGLxuNzHq7ZNAvPryn51TjSJRLhdJw694RDpump")}
               title="Copy CA"
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
