@@ -66,9 +66,9 @@ const MOCK_TOKENS = [
 ]
 
 const MOCK_META_DATA = {
-  meta: "Animal / Classic Meme",
+  meta: "Unknown Meta",
   confidence: "high" as const,
-  reasoning: "Strong presence of dog and cat-themed tokens dominating recent launches with high community engagement",
+  reasoning: "Strong presence of Plane and Ryan-themed tokens dominating recent launches with high community engagement",
   exampleTokens: [
     { symbol: "$RYANAIR", name: "RyanAir", confidence: 0.92 },
 
@@ -79,32 +79,40 @@ const MOCK_META_DATA = {
 
 const MOCK_GEMS_DATA = [
   {
-    token: { symbol: "MGEM1", name: "Mock Gem 1", address: "mockgem1" },
-    score: 85,
+    token: { 
+      symbol: "$RyanAir", 
+      name: "RyanAir", 
+      address: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU" 
+    },
+    score: 88,
     status: "WATCH" as const,
     factors: {
-      pumpTraction: 78,
-      dexMomentum: 82,
-      bundleRisk: 15,
-      narrativeStrength: 88,
-      volumeTrend: 90
+      pumpTraction: 85,
+      dexMomentum: 90,
+      bundleRisk: 18,
+      narrativeStrength: 87,
+      volumeTrend: 92
     },
-    reasoning: "High community engagement with strong volume growth and low bundle risk",
+    reasoning: "Possible meta setter. Despite market conditions, has good volume and market interest",
     source: "dex" as const,
     riskLevel: "low" as const
   },
   {
-    token: { symbol: "MGEM2", name: "Mock Gem 2", address: "mockgem2" },
-    score: 78,
+    token: { 
+      symbol: "$brainrot", 
+      name: "brainrot", 
+      address: "9vKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgBrN" 
+    },
+    score: 82,
     status: "EARLY" as const,
     factors: {
-      pumpTraction: 72,
-      dexMomentum: 75,
-      bundleRisk: 22,
-      narrativeStrength: 80,
-      volumeTrend: 85
+      pumpTraction: 80,
+      dexMomentum: 78,
+      bundleRisk: 20,
+      narrativeStrength: 85,
+      volumeTrend: 88
     },
-    reasoning: "Strong liquidity growth with emerging narrative strength",
+    reasoning: "Launched during Alon call hype. Has maintained steady market cap and positioning itself as permanent mainstay for Solana Trenches",
     source: "dex" as const,
     riskLevel: "medium" as const
   }
@@ -112,17 +120,17 @@ const MOCK_GEMS_DATA = [
 
 const MOCK_SNAPSHOT_DATA = {
   aiMarketRead: {
-    overallSentiment: "BULLISH" as const,
+    overallSentiment: "BEARISH" as const,
     confidenceScore: 0.78,
-    summary: "Mock market conditions show favorable trends for memecoin trading with increased volume and positive sentiment",
+    summary: "",
     dataAnalyzed: ["Volume trends", "New pair launches", "Social metrics", "DEX activity"],
     keyFactors: [
       { factor: "24h Volume Growth", impact: "POSITIVE" as const, weight: 0.85 },
       { factor: "New Pair Velocity", impact: "POSITIVE" as const, weight: 0.72 },
       { factor: "Market Saturation", impact: "NEGATIVE" as const, weight: 0.45 }
     ],
-    recommendation: "Monitor high-volume tokens with strong community engagement and low bundle risk",
-    warnings: ["High volatility expected", "Demo data - not for actual trading decisions"],
+    recommendation: "The market seems bearish today, driven by Bitcoin’s sharp price drop. However, some smaller “trench” coins are still showing signs of life, with a few running up to solid market caps.",
+    warnings: ["High volatility expected", ""],
     timestamp: new Date()
   },
   volumeSnapshot: {

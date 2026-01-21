@@ -3,7 +3,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Loader2, AlertCircle, Zap } from "lucide-react"
+import { Loader2, AlertCircle, Zap, Copy, Check } from "lucide-react"
+import { useState } from "react"
 import type { GemScore } from "@/lib/gem-finder"
 
 interface FindGemsCardProps {
@@ -13,6 +14,23 @@ interface FindGemsCardProps {
 }
 
 export function FindGemsCard({ gems, isLoading, error }: FindGemsCardProps) {
+  const [copiedAddress, setCopiedAddress] = useState<string | null>(null)
+
+  const copyToClipboard = async (address: string) => {
+    try {
+      await navigator.clipboard.writeText(address)
+      setCopiedAddress(address)
+      setTimeout(() => setCopiedAddress(null), 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
+  }
+
+  const truncateAddress = (address: string) => {
+    if (address.length <= 12) return address
+    return `${address.slice(0, 6)}...${address.slice(-4)}`
+  }
+
   if (error) {
     return (
       <Card className="border-destructive/50 bg-destructive/5">
@@ -92,9 +110,25 @@ export function FindGemsCard({ gems, isLoading, error }: FindGemsCardProps) {
               className="rounded-lg border border-border/50 bg-background/50 p-3 space-y-2"
             >
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <div className="font-semibold text-sm">{gem.token.symbol}</div>
                   <div className="text-xs text-muted-foreground">{gem.token.name}</div>
+                  <div className="flex items-center gap-1.5 mt-1">
+                    <code className="text-[10px] text-muted-foreground font-mono bg-muted/50 px-1.5 py-0.5 rounded">
+                      {truncateAddress(gem.token.address)}
+                    </code>
+                    <button
+                      onClick={() => copyToClipboard(gem.token.address)}
+                      className="p-0.5 hover:bg-muted rounded transition-colors"
+                      title="Copy address"
+                    >
+                      {copiedAddress === gem.token.address ? (
+                        <Check className="h-3 w-3 text-success" />
+                      ) : (
+                        <Copy className="h-3 w-3 text-muted-foreground hover:text-foreground" />
+                      )}
+                    </button>
+                  </div>
                 </div>
                 <div className="text-right">
                   <div className="text-xl font-bold text-primary">{gem.score}</div>

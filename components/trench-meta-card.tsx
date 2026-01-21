@@ -7,7 +7,7 @@ import Image from "next/image"
 const MOCK_TRENCH_META = {
   title: "No Meta Today",
   description: "There’s no established meta at the moment, mainly because major coins like BTC and various alts have been bleeding since the weekend.",
-  emoji: "",
+  emoji: "?",
   imageUrl: null
 }
 
